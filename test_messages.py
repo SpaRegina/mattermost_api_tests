@@ -1,18 +1,27 @@
 import requests
 from config import BASE_URL
-from utils import get_token, get_team_id, get_channel_id
+from utils import get_token, get_channel_id
 
 def test_send_message():
     token = get_token()
-    team_id = get_team_id(token)
-    channel_id = get_channel_id(token, team_id)
-    headers = {"Authorization": f"Bearer {token}"}
-    post = requests.post(
+    channel_id = get_channel_id(token)
+    response = requests.post(
         f"{BASE_URL}/api/v4/posts",
-        headers=headers,
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "channel_id": channel_id,
-            "message": "Hello from automated test!"
+            "message": "Hello from Pytest!"
         }
     )
-    assert post.status_code == 201
+    assert response.status_code == 201
+
+def test_get_messages_from_channel():
+    token = get_token()
+    channel_id = get_channel_id(token)
+    response = requests.get(
+        f"{BASE_URL}/api/v4/channels/{channel_id}/posts",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "posts" in data
